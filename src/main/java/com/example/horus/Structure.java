@@ -18,6 +18,10 @@ interface Structure {
 class Wall implements Structure {
     private List<Block> blocks;
 
+    public Wall (List<Block> blocks) {
+        this.blocks = blocks;
+    }
+
     //all overrides
     @Override
     public int count() {
@@ -25,7 +29,6 @@ class Wall implements Structure {
         for (Block block : blocks) {
             if (block instanceof CompositeBlock) { // jeśli blok jest obiektem CompositeBlock i ma w sobie inne bloki
                 sizeOfBlocks = sizeOfBlocks + ((CompositeBlock) block).getBlocks().size();
-                return sizeOfBlocks;
             }
         }
         return sizeOfBlocks;
@@ -33,36 +36,44 @@ class Wall implements Structure {
 
     @Override
     public Optional<Block> findBlockByColor(String color) {
-        return getBlocksByParameter(color).stream().findFirst();
+        for (Block block : blocks) {
+            // sprawdzamy czy blok jest obiektem CompositeBlock
+            if (block instanceof CompositeBlock) {
+                List<Block> listOfCompoositeBlocks = ((CompositeBlock) block).getBlocks();
+                for (Block blockFromCompositeBlock : listOfCompoositeBlocks) {
+                    if (blockFromCompositeBlock.getColor().equals(color)) {
+                        return Optional.of(blockFromCompositeBlock);
+                    }
+                }
+            }
+            // sprawdzamy czy blok jest obiektem Blok
+            else if (block.getColor().equals(color)) {
+                return Optional.of(block);
+            }
+        }
+        return Optional.empty();
     }
 
     @Override
     public List<Block> findBlocksByMaterial(String material) {
-        return getBlocksByParameter(material);
-    }
-
-    private List<Block> getBlocksByParameter(String param) { // unikanie powielania kodu
         List<Block> blocksWithParameters = new ArrayList<>();
-        List<Block> compositeBlocksWithParameters = new ArrayList<>();
 
         for (Block block : blocks) {
             // sprawdzamy czy blok jest obiektem CompositeBlock
             if (block instanceof CompositeBlock) {
                 List<Block> listOfCompoositeBlocks = ((CompositeBlock) block).getBlocks();
                 for (Block blockFromCompositeBlock : listOfCompoositeBlocks) {
-                    if (blockFromCompositeBlock.getColor().equals(param) || blockFromCompositeBlock.getMaterial().equals(param)) {
-                        compositeBlocksWithParameters.add(blockFromCompositeBlock);
-                        return compositeBlocksWithParameters;
+                    if (blockFromCompositeBlock.getMaterial().equals(material)) {
+                        blocksWithParameters.add(blockFromCompositeBlock);
                     }
                 }
             }
             // sprawdzamy czy blok jest obiektem Blok
-            if (block.getColor().equals(param) || (block.getMaterial().equals(param))) {
+            else if (block.getMaterial().equals(material)) {
                 blocksWithParameters.add(block);
-                return blocksWithParameters;
             }
         }
-        return null;
+        return blocksWithParameters;
     }
 }
 
