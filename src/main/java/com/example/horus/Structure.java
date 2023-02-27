@@ -18,10 +18,6 @@ interface Structure {
 class Wall implements Structure {
     private List<Block> blocks;
 
-    public Wall (List<Block> blocks) {
-        this.blocks = blocks;
-    }
-
     //all overrides
     @Override
     public int count() {
